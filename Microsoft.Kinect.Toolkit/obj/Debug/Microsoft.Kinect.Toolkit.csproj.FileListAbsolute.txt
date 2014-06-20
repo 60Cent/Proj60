@@ -1,0 +1,12 @@
+D:\Temp\kinect\60cent\Proj60\Microsoft.Kinect.Toolkit\bin\Debug\Microsoft.Kinect.Toolkit.dll
+D:\Temp\kinect\60cent\Proj60\Microsoft.Kinect.Toolkit\bin\Debug\Microsoft.Kinect.Toolkit.pdb
+D:\Temp\kinect\60cent\Proj60\Microsoft.Kinect.Toolkit\obj\Debug\ResolveAssemblyReference.cache
+D:\Temp\kinect\60cent\Proj60\Microsoft.Kinect.Toolkit\obj\Debug\KinectSensorChooserUI.baml
+D:\Temp\kinect\60cent\Proj60\Microsoft.Kinect.Toolkit\obj\Debug\KinectSensorChooserUI.g.cs
+D:\Temp\kinect\60cent\Proj60\Microsoft.Kinect.Toolkit\obj\Debug\Microsoft.Kinect.Toolkit_MarkupCompile.cache
+D:\Temp\kinect\60cent\Proj60\Microsoft.Kinect.Toolkit\obj\Debug\Microsoft.Kinect.Toolkit.g.resources
+D:\Temp\kinect\60cent\Proj60\Microsoft.Kinect.Toolkit\obj\Debug\Microsoft.Kinect.Toolkit.Properties.Resources.resources
+D:\Temp\kinect\60cent\Proj60\Microsoft.Kinect.Toolkit\obj\Debug\GenerateResource.read.1.tlog
+D:\Temp\kinect\60cent\Proj60\Microsoft.Kinect.Toolkit\obj\Debug\GenerateResource.write.1.tlog
+D:\Temp\kinect\60cent\Proj60\Microsoft.Kinect.Toolkit\obj\Debug\Microsoft.Kinect.Toolkit.dll
+D:\Temp\kinect\60cent\Proj60\Microsoft.Kinect.Toolkit\obj\Debug\Microsoft.Kinect.Toolkit.pdb

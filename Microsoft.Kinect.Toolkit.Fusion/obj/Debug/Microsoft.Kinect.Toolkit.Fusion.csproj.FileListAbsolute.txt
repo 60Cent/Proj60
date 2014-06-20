@@ -1,0 +1,10 @@
+D:\Temp\kinect\60cent\Proj60\Microsoft.Kinect.Toolkit.Fusion\bin\Debug\KinectFusion180_32.dll
+D:\Temp\kinect\60cent\Proj60\Microsoft.Kinect.Toolkit.Fusion\bin\Debug\KinectFusion180_64.dll
+D:\Temp\kinect\60cent\Proj60\Microsoft.Kinect.Toolkit.Fusion\bin\Debug\Microsoft.Kinect.Toolkit.Fusion.dll
+D:\Temp\kinect\60cent\Proj60\Microsoft.Kinect.Toolkit.Fusion\bin\Debug\Microsoft.Kinect.Toolkit.Fusion.pdb
+D:\Temp\kinect\60cent\Proj60\Microsoft.Kinect.Toolkit.Fusion\obj\Debug\ResolveAssemblyReference.cache
+D:\Temp\kinect\60cent\Proj60\Microsoft.Kinect.Toolkit.Fusion\obj\Debug\Microsoft.Kinect.Toolkit.Fusion.Resources.resources
+D:\Temp\kinect\60cent\Proj60\Microsoft.Kinect.Toolkit.Fusion\obj\Debug\GenerateResource.read.1.tlog
+D:\Temp\kinect\60cent\Proj60\Microsoft.Kinect.Toolkit.Fusion\obj\Debug\GenerateResource.write.1.tlog
+D:\Temp\kinect\60cent\Proj60\Microsoft.Kinect.Toolkit.Fusion\obj\Debug\Microsoft.Kinect.Toolkit.Fusion.dll
+D:\Temp\kinect\60cent\Proj60\Microsoft.Kinect.Toolkit.Fusion\obj\Debug\Microsoft.Kinect.Toolkit.Fusion.pdb

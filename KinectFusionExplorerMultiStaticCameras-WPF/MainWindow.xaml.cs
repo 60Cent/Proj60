@@ -215,6 +215,9 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
         /// </summary>
         private Matrix4 worldToVolumeTransform;
 
+        private FusionPointCloudImageFrame currentWorldPCL;
+        private FusionPointCloudImageFrame currentCameraPCL;
+
         /// <summary>
         /// To display shaded surface normals frame instead of shaded surface frame
         /// </summary>
@@ -1236,6 +1239,8 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
                 this.ShowStatusMessage(ex.Message);
             }
 
+            currentWorldPCL = new FusionPointCloudImageFrame(sensor.DepthWidth, sensor.DepthHeight);
+            currentCameraPCL = new FusionPointCloudImageFrame(sensor.DepthWidth, sensor.DepthHeight);
             return isSupportNearMode;
         }
 
@@ -1680,16 +1685,25 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
                             else if(this.tracking)
                             {
                                 // Just integrate depth
+                                float alignmentEnergy;
+                                Matrix4 AlignmentMatrix = new Matrix4();
                                 Dispatcher.BeginInvoke(
                                     (Action)
                                     (() =>
-                                     this.volume.ProcessFrame(
-                                         sensor.DepthFloatFrame,
-                                         7,
-                                         this.integrationWeight, 
-                                         this.volume.GetCurrentWorldToCameraTransform())
-                                         ));
+                                     this.volume.IntegrateFrame(
+                                         sensor.DepthFloatFrame, this.integrationWeight, this.volume.GetCurrentWorldToCameraTransform())));
 
+                                this.volume.CalculatePointCloud(this.currentWorldPCL, this.volume.GetCurrentWorldToCameraTransform());
+
+                                this.volume.AlignPointClouds(this.currentCameraPCL,
+                                    this.currentWorldPCL,
+                                    100,
+                                    null,
+                                    out alignmentEnergy,
+                                    ref AlignmentMatrix);
+
+                                this.currentCameraPCL = this.currentWorldPCL;
+                                sensor.ReconCamera.UpdateFrustumTransformMatrix4(AlignmentMatrix);
 
 
                             }
