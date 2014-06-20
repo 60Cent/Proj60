@@ -226,6 +226,11 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
         private bool pauseIntegration;
 
         /// <summary>
+        /// Tracking
+        /// </summary>
+        private bool tracking = false;
+
+        /// <summary>
         /// Image integration weight
         /// </summary>
         private short integrationWeight = FusionDepthProcessor.DefaultIntegrationWeight;
@@ -1614,7 +1619,7 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
             }
 
             // Check near mode
-            sensor.CheckNearMode();
+            //sensor.CheckNearMode();
 
             // Convert depth frame to depth float frame
             this.volume.DepthToDepthFloatFrame(
@@ -1672,6 +1677,22 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
                                 // Flag that we have captured color
                                 this.colorCaptured = true;
                             }
+                            else if(this.tracking)
+                            {
+                                // Just integrate depth
+                                Dispatcher.BeginInvoke(
+                                    (Action)
+                                    (() =>
+                                     this.volume.ProcessFrame(
+                                         sensor.DepthFloatFrame,
+                                         7,
+                                         this.integrationWeight, 
+                                         this.volume.GetCurrentWorldToCameraTransform())
+                                         ));
+
+
+
+                            }
                             else
                             {
                                 // Just integrate depth
@@ -1679,7 +1700,10 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
                                     (Action)
                                     (() =>
                                      this.volume.IntegrateFrame(
-                                         sensor.DepthFloatFrame, this.integrationWeight, sensor.ReconCamera.WorldToCameraMatrix4)));
+                                         sensor.DepthFloatFrame, this.integrationWeight, this.volume.GetCurrentWorldToCameraTransform())));
+
+
+
                             }
                         }
                     }
