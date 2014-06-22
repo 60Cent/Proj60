@@ -666,6 +666,16 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
             }
         }
 
+        public void RetreiveFrustumTransformMatrix4(Matrix4 worldToCameraMatrix4)
+        {
+            // Update the frustum graphics if we have created them
+            if (null != this.CameraFrustum)
+            {
+                Matrix4 transform = Helper.ConvertMatrix3DToMatrix4(this.cameraFrustumTransform3D.Matrix);
+
+                worldToCameraMatrix4 = transform;
+            }
+        }
         /// <summary>
         /// Update the transform from the mouse deltas
         /// </summary>

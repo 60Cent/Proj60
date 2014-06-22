@@ -1636,128 +1636,39 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
         /// <param name="sensor">The the sensor to use in reconstruction.</param>
         bool tracked = false;
         float accuracyOfTrack = 0;
-        double newAngleX = -30001;
-        double newAngleY = -30001;
-        double newAngleZ = -30001;
-        double oldNewAngleX = 0;
-        double oldNewAngleY = 0;
-        double oldNewAngleZ = 0;
-        bool first = true;
-
         private void doDepthStuff(ReconstructionSensor sensor)
         {
-            if (first)
-            {
-
-                this.CameraChangeMatrix4 = sensor.ReconCamera.WorldToCameraMatrix4
-                ;
-                first = false;
-            }
-            // Attempt to Track
-            //Dispatcher.BeginInvoke(
-            //    (Action)
-            //    (() =>
-            //tracked = this.volume.AlignDepthFloatToReconstruction(
-            //sensor.DepthFloatFrame,
-            //7,
-            //sensor.deltaFromReferenceFrame,
-            //out accuracyOfTrack,
-            //sensor.ReconCamera.WorldToCameraMatrix4
-            //)
-            //));
-            if (currentPCL == null)
-            {
-                currentPCL = new FusionPointCloudImageFrame(sensor.DepthWidth, sensor.DepthHeight);
-                oldPCL = new FusionPointCloudImageFrame(sensor.DepthWidth, sensor.DepthHeight);
-                this.volume.CalculatePointCloud(oldPCL, this.volume.GetCurrentWorldToCameraTransform());
-            }
-
-            //this.volume.IntegrateFrame(
-            //    sensor.DepthFloatFrame,
-            //    this.integrationWeight,
-            //    sensor.ReconCamera.WorldToCameraMatrix4);
-            this.volume.CalculatePointCloud(currentPCL, this.volume.GetCurrentWorldToCameraTransform());
             tracked = this.volume.ProcessFrame(
                 sensor.DepthFloatFrame,
-                7,
+                70,
                 this.integrationWeight,
                 sensor.ReconCamera.WorldToCameraMatrix4);
-
-
-//            if (tracked)
-  //          {
-            //tracked = this.volume.AlignPointClouds(
-            //oldPCL,
-            //currentPCL,
-            //20,
-            //sensor.deltaFromReferenceFrame,
-            //out accuracyOfTrack,
-            //ref CameraChangeMatrix4
-            //);
-            oldPCL = currentPCL;
-    //        }
-            //int a = 0;
-            //if (CameraChangeMatrix4 != this.volume.GetCurrentWorldToCameraTransform())
-            //{
-            //    a = 3;
-            //    CameraChangeMatrix4 = this.volume.GetCurrentWorldToCameraTransform();
-            //}
-            // Attempt to Track
-            //Dispatcher.BeginInvoke(
-            //    (Action)
-            //    (() =>
-            //tracked = this.volume.ProcessFrame(
-            //sensor.DepthFloatFrame,
-            //7,
-            //this.integrationWeight,
-            //CameraChangeMatrix4
-            //)
-            //));
-
+            
             if (tracked)
             {
                 this.CameraChangeMatrix4 = this.volume.GetCurrentWorldToCameraTransform();// sensor.ReconCamera.WorldToCameraMatrix4;
-                newAngleX = Math.Atan2(CameraChangeMatrix4.M21, CameraChangeMatrix4.M21);
-
-                newAngleY = Math.Atan2(CameraChangeMatrix4.M31,
-                    Math.Sqrt(
-                    (
-                    (CameraChangeMatrix4.M32) * (CameraChangeMatrix4.M32)
-                    ) + (
-                    (CameraChangeMatrix4.M33) * (CameraChangeMatrix4.M33)
-                    )))
-                ;
-
-                newAngleZ = Math.Atan2(sensor.ReconCamera.WorldToCameraMatrix4.M32, CameraChangeMatrix4.M33)
-               ;
-
-                if ((newAngleX > -30000) && (newAngleY > -30000) && (newAngleZ > -30000) && Math.Abs(accuracyOfTrack) < 0.1)
+                this.integrationWeight = this.integrationWeight++;
+                if (this.integrationWeight > 1000)
                 {
-
-
-                    //sensor.ReconSensorControl.AngleX = newAngleX;// *(180 / Math.PI);
-                    ////;
-
-
-
-                    //sensor.ReconSensorControl.AngleY = newAngleY;// *(180 / Math.PI);
-                    ////;
-
-
-
-                    //sensor.ReconSensorControl.AngleZ = newAngleZ;// *(180 / Math.PI);
-                    ////;//
-
-                    newAngleX = -30001;
-                    newAngleY = -30001;
-                    newAngleZ = -30001;
-
-                    sensor.ReconCamera.UpdateFrustumTransformMatrix4(CameraChangeMatrix4);
-
-
+                    this.integrationWeight = 1000;
                 }
-                //this.virtualCamera.UpdateFrustumTransformMatrix4(sensor.ReconCamera.WorldToCameraMatrix4);
+                if (Math.Abs(accuracyOfTrack) < 0.1)
+                {
+                    sensor.ReconCamera.UpdateFrustumTransformMatrix4(CameraChangeMatrix4);
+                }
+
                 tracked = false;
+            }
+            else
+            {
+                Matrix4 newView = new Matrix4();
+                sensor.ReconCamera.RetreiveFrustumTransformMatrix4(newView);
+                this.integrationWeight = this.integrationWeight--;
+                if (this.integrationWeight < 1)
+                {
+                    this.integrationWeight = 1;
+                }
+                sensor.ReconCamera.WorldToCameraMatrix4 = this.volume.GetCurrentWorldToCameraTransform();
             }
         }
 
@@ -2167,53 +2078,61 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
                 return;
             }
 
-            this.tracking = !this.tracking;
-            // Reconstruct frames
-            bool[] successfulSaveSettings = this.Reconstruct();
-
-            if (null == successfulSaveSettings)
+            if (tracking)
             {
-                this.lastSensorSettingStatus = string.Empty;
+
+                this.tracking = false;
             }
             else
             {
-                StringBuilder successfulSaveCameras = new StringBuilder("Camera ");
-                StringBuilder failedSaveCameras = new StringBuilder("Camera ");
-                bool hasSuccessfulSavedCamera = false;
-                bool hasFailedSavedCamera = false;
+                tracking = true;
+                // Reconstruct frames
+                bool[] successfulSaveSettings = this.Reconstruct();
 
-                for (int i = 0; i < successfulSaveSettings.Length; i++)
+                if (null == successfulSaveSettings)
                 {
-                    if (successfulSaveSettings[i])
+                    this.lastSensorSettingStatus = string.Empty;
+                }
+                else
+                {
+                    StringBuilder successfulSaveCameras = new StringBuilder("Camera ");
+                    StringBuilder failedSaveCameras = new StringBuilder("Camera ");
+                    bool hasSuccessfulSavedCamera = false;
+                    bool hasFailedSavedCamera = false;
+
+                    for (int i = 0; i < successfulSaveSettings.Length; i++)
                     {
-                        successfulSaveCameras.AppendFormat("{0} ", i);
+                        if (successfulSaveSettings[i])
+                        {
+                            successfulSaveCameras.AppendFormat("{0} ", i);
 
-                        hasSuccessfulSavedCamera = true;
+                            hasSuccessfulSavedCamera = true;
+                        }
+                        else
+                        {
+                            failedSaveCameras.AppendFormat("{0} ", i);
+
+                            hasFailedSavedCamera = true;
+                        }
                     }
-                    else
+
+                    StringBuilder cameraSavingStatus = new StringBuilder(string.Empty);
+                    if (hasSuccessfulSavedCamera)
                     {
-                        failedSaveCameras.AppendFormat("{0} ", i);
-
-                        hasFailedSavedCamera = true;
+                        cameraSavingStatus.AppendFormat("{0}: {1}    ", successfulSaveCameras, Properties.Resources.SettingsSaved);
                     }
+
+                    if (hasFailedSavedCamera)
+                    {
+                        cameraSavingStatus.AppendFormat("{0}: {1}    ", failedSaveCameras, Properties.Resources.ErrorSaveSettings);
+                    }
+
+                    this.lastSensorSettingStatus = cameraSavingStatus.ToString();
                 }
 
-                StringBuilder cameraSavingStatus = new StringBuilder(string.Empty);
-                if (hasSuccessfulSavedCamera)
-                {
-                    cameraSavingStatus.AppendFormat("{0}: {1}    ", successfulSaveCameras, Properties.Resources.SettingsSaved);
-                }
-
-                if (hasFailedSavedCamera)
-                {
-                    cameraSavingStatus.AppendFormat("{0}: {1}    ", failedSaveCameras, Properties.Resources.ErrorSaveSettings);
-                }
-
-                this.lastSensorSettingStatus = cameraSavingStatus.ToString();
+                // Update manual reset information to status bar
+                this.ShowStatusMessage(Properties.Resources.Reconstructing);
             }
-
-            // Update manual reset information to status bar
-            this.ShowStatusMessage(Properties.Resources.Reconstructing);
         }
 
         //private void CreateMeshButtonClick(object sender, RoutedEventArgs e)
