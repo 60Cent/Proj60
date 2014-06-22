@@ -26,7 +26,7 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
         /// started is set true when the camera is running
         /// </summary>
         private bool started = false;
-        public FusionColorImageFrame deltaFromReferenceFrame;
+
         /// <summary>
         /// Track whether Dispose has been called
         /// </summary>
@@ -102,6 +102,7 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
         /// </summary>
         private GraphicsCamera reconstructionSensorCamera;
 
+        public FusionColorImageFrame deltaFromReferenceFrame;
         /// <summary>
         /// Synchronization object for color access
         /// </summary>
@@ -518,6 +519,7 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
         /// <returns>Returns true if the sensor supports near mode.</returns>
         public bool StartDepthStream(DepthImageFormat format)
         {
+            
             if (null == this.sensor)
             {
                 this.StatusMessage = "No ready Kinect found!";
@@ -542,7 +544,7 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
                 // Set Near Mode by default
                 try
                 {
-                    this.Sensor.DepthStream.Range = DepthRange.Near;
+ //                   this.Sensor.DepthStream.Range = DepthRange.Near;
                     this.ReconSensorControl.NearMode = true;
                 }
                 catch (InvalidOperationException)

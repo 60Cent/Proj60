@@ -57,6 +57,9 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
         /// </summary>
         private const int StatusBarInterval = 1;
 
+        private bool tracking = false;
+        Matrix4 CameraChangeMatrix4;
+
         /// <summary>
         /// The reconstruction volume processor type. This parameter sets whether AMP or CPU processing
         /// is used. Note that CPU processing will likely be too slow for real-time processing.
@@ -83,7 +86,7 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
         /// <summary>
         /// The count of frames to wait as a lead in before we start reconstructing (e.g. for when we turn the IR Laser on or off)
         /// </summary>
-        private const int PerCameraReconstructionFrameLeadInCount = 30;
+        private const int PerCameraReconstructionFrameLeadInCount = 0;// 30;
 
         /// <summary>
         /// WPF3D Origin coordinate cross axis size in m
@@ -215,9 +218,6 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
         /// </summary>
         private Matrix4 worldToVolumeTransform;
 
-        private FusionPointCloudImageFrame currentWorldPCL;
-        private FusionPointCloudImageFrame currentCameraPCL;
-
         /// <summary>
         /// To display shaded surface normals frame instead of shaded surface frame
         /// </summary>
@@ -229,38 +229,36 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
         private bool pauseIntegration;
 
         /// <summary>
-        /// Tracking
-        /// </summary>
-        private bool tracking = false;
-
-        /// <summary>
         /// Image integration weight
         /// </summary>
-        private short integrationWeight = FusionDepthProcessor.DefaultIntegrationWeight;
+        private short integrationWeight = 1;//FusionDepthProcessor.DefaultIntegrationWeight;
 
         /// <summary>
         /// The reconstruction volume voxel density in voxels per meter (vpm)
         /// 1000mm / 256vpm = ~3.9mm/voxel
         /// </summary>
-        private float voxelsPerMeter = 256.0f;
+        private float voxelsPerMeter = 128.0f;
 
         /// <summary>
         /// The reconstruction volume voxel resolution in the X axis
         /// At a setting of 256vpm the volume is 512 / 256 = 2m wide
         /// </summary>
-        private int voxelsX = 256;//512;
+        private int voxelsX = 128;//512;
 
         /// <summary>
         /// The reconstruction volume voxel resolution in the Y axis
         /// At a setting of 256vpm the volume is 384 / 256 = 1.5m high
         /// </summary>
-        private int voxelsY = 256;//384;
+        private int voxelsY = 128;//384;
 
         /// <summary>
         /// The reconstruction volume voxel resolution in the Z axis
         /// At a setting of 256vpm the volume is 512 / 256 = 2m deep
         /// </summary>
-        private int voxelsZ = 256;//512;
+        private int voxelsZ = 128;//512;
+
+        FusionPointCloudImageFrame currentPCL;
+        FusionPointCloudImageFrame oldPCL;
 
         /// <summary>
         /// The reconstruction is integrating frames
@@ -1205,7 +1203,7 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
                 return true;
             }
 
-            bool isSupportNearMode = false;
+            bool isSupportNearMode = true;
             try
             {
                 // Enable depth stream, register event handler and start
@@ -1239,8 +1237,6 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
                 this.ShowStatusMessage(ex.Message);
             }
 
-            currentWorldPCL = new FusionPointCloudImageFrame(sensor.DepthWidth, sensor.DepthHeight);
-            currentCameraPCL = new FusionPointCloudImageFrame(sensor.DepthWidth, sensor.DepthHeight);
             return isSupportNearMode;
         }
 
@@ -1497,7 +1493,7 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
 
                         if (this.processedFrameLeadInCount > PerCameraReconstructionFrameLeadInCount)
                         {
-                            if (this.processedFrameCount >= this.perCameraReconstructionFrameCount && !tracking)
+                            if (this.processedFrameCount >= this.perCameraReconstructionFrameCount && !this.tracking)
                             {
                                 if (this.GoToNextCameraIndex())
                                 {
@@ -1624,7 +1620,7 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
             }
 
             // Check near mode
-            sensor.CheckNearMode();
+            //sensor.CheckNearMode();
 
             // Convert depth frame to depth float frame
             this.volume.DepthToDepthFloatFrame(
@@ -1634,50 +1630,137 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
             Dispatcher.BeginInvoke((Action)(() => this.DepthFrameComplete(sensor)));
         }
 
-
-        private void ReconstructStuff(ReconstructionSensor sensor)
-        {
-            // Just integrate depth
-            float alignmentEnergy = 1;
-            bool tracked = false;
-            Matrix4 AlignmentMatrix = sensor.ReconCamera.WorldToCameraMatrix4;
-            if (this.currentWorldPCL == null)
-            {
-                this.currentWorldPCL = new FusionPointCloudImageFrame(sensor.DepthWidth, sensor.DepthHeight);
-                this.currentCameraPCL = new FusionPointCloudImageFrame(sensor.DepthWidth, sensor.DepthHeight);
-            }
-
-
-            tracked = this.volume.ProcessFrame(
-                sensor.DepthFloatFrame,
-                7,
-               this.integrationWeight,
-               sensor.ReconCamera.WorldToCameraMatrix4);
-            //this.volume.IntegrateFrame(
-            //    sensor.DepthFloatFrame,
-            //    this.integrationWeight,
-            //    sensor.ReconCamera.WorldToCameraMatrix4);
-            //this.volume.CalculatePointCloud(this.currentWorldPCL, this.volume.GetCurrentWorldToCameraTransform());
-
-            //tracked = this.volume.AlignPointClouds(
-            //    this.currentCameraPCL,
-            //    this.currentWorldPCL,
-            //    10,
-            //    sensor.deltaFromReferenceFrame,
-            //    out alignmentEnergy,
-            //    ref AlignmentMatrix);
-            //this.currentCameraPCL = this.currentWorldPCL;
-            
-
-            if (tracked)
-            {
-                sensor.ReconCamera.UpdateFrustumTransformMatrix4(this.volume.GetCurrentWorldToCameraTransform());
-            }
-        }
         /// <summary>
         /// Process the depth input
         /// </summary>
         /// <param name="sensor">The the sensor to use in reconstruction.</param>
+        bool tracked = false;
+        float accuracyOfTrack = 0;
+        double newAngleX = -30001;
+        double newAngleY = -30001;
+        double newAngleZ = -30001;
+        double oldNewAngleX = 0;
+        double oldNewAngleY = 0;
+        double oldNewAngleZ = 0;
+        bool first = true;
+
+        private void doDepthStuff(ReconstructionSensor sensor)
+        {
+            if (first)
+            {
+
+                this.CameraChangeMatrix4 = sensor.ReconCamera.WorldToCameraMatrix4
+                ;
+                first = false;
+            }
+            // Attempt to Track
+            //Dispatcher.BeginInvoke(
+            //    (Action)
+            //    (() =>
+            //tracked = this.volume.AlignDepthFloatToReconstruction(
+            //sensor.DepthFloatFrame,
+            //7,
+            //sensor.deltaFromReferenceFrame,
+            //out accuracyOfTrack,
+            //sensor.ReconCamera.WorldToCameraMatrix4
+            //)
+            //));
+            if (currentPCL == null)
+            {
+                currentPCL = new FusionPointCloudImageFrame(sensor.DepthWidth, sensor.DepthHeight);
+                oldPCL = new FusionPointCloudImageFrame(sensor.DepthWidth, sensor.DepthHeight);
+                this.volume.CalculatePointCloud(oldPCL, this.volume.GetCurrentWorldToCameraTransform());
+            }
+
+            //this.volume.IntegrateFrame(
+            //    sensor.DepthFloatFrame,
+            //    this.integrationWeight,
+            //    sensor.ReconCamera.WorldToCameraMatrix4);
+            this.volume.CalculatePointCloud(currentPCL, this.volume.GetCurrentWorldToCameraTransform());
+            tracked = this.volume.ProcessFrame(
+                sensor.DepthFloatFrame,
+                7,
+                this.integrationWeight,
+                sensor.ReconCamera.WorldToCameraMatrix4);
+
+
+//            if (tracked)
+  //          {
+            //tracked = this.volume.AlignPointClouds(
+            //oldPCL,
+            //currentPCL,
+            //20,
+            //sensor.deltaFromReferenceFrame,
+            //out accuracyOfTrack,
+            //ref CameraChangeMatrix4
+            //);
+            oldPCL = currentPCL;
+    //        }
+            //int a = 0;
+            //if (CameraChangeMatrix4 != this.volume.GetCurrentWorldToCameraTransform())
+            //{
+            //    a = 3;
+            //    CameraChangeMatrix4 = this.volume.GetCurrentWorldToCameraTransform();
+            //}
+            // Attempt to Track
+            //Dispatcher.BeginInvoke(
+            //    (Action)
+            //    (() =>
+            //tracked = this.volume.ProcessFrame(
+            //sensor.DepthFloatFrame,
+            //7,
+            //this.integrationWeight,
+            //CameraChangeMatrix4
+            //)
+            //));
+
+            if (tracked)
+            {
+                this.CameraChangeMatrix4 = this.volume.GetCurrentWorldToCameraTransform();// sensor.ReconCamera.WorldToCameraMatrix4;
+                newAngleX = Math.Atan2(CameraChangeMatrix4.M21, CameraChangeMatrix4.M21);
+
+                newAngleY = Math.Atan2(CameraChangeMatrix4.M31,
+                    Math.Sqrt(
+                    (
+                    (CameraChangeMatrix4.M32) * (CameraChangeMatrix4.M32)
+                    ) + (
+                    (CameraChangeMatrix4.M33) * (CameraChangeMatrix4.M33)
+                    )))
+                ;
+
+                newAngleZ = Math.Atan2(sensor.ReconCamera.WorldToCameraMatrix4.M32, CameraChangeMatrix4.M33)
+               ;
+
+                if ((newAngleX > -30000) && (newAngleY > -30000) && (newAngleZ > -30000) && Math.Abs(accuracyOfTrack) < 0.1)
+                {
+
+
+                    //sensor.ReconSensorControl.AngleX = newAngleX;// *(180 / Math.PI);
+                    ////;
+
+
+
+                    //sensor.ReconSensorControl.AngleY = newAngleY;// *(180 / Math.PI);
+                    ////;
+
+
+
+                    //sensor.ReconSensorControl.AngleZ = newAngleZ;// *(180 / Math.PI);
+                    ////;//
+
+                    newAngleX = -30001;
+                    newAngleY = -30001;
+                    newAngleZ = -30001;
+
+                    sensor.ReconCamera.UpdateFrustumTransformMatrix4(CameraChangeMatrix4);
+
+
+                }
+                //this.virtualCamera.UpdateFrustumTransformMatrix4(sensor.ReconCamera.WorldToCameraMatrix4);
+                tracked = false;
+            }
+        }
+
         private void ReconstructDepthData(ReconstructionSensor sensor)
         {
             try
@@ -1695,6 +1778,7 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
                     this.PreProcessDepthData(sensor);
 
                     // We would do camera tracking here if required...
+                   
 
                     // Lock the volume operations
                     lock (this.reconstructionLock)
@@ -1708,7 +1792,6 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
                                 // Pre-process color
                                 sensor.MapColorToDepth();
 
-                                // Integrate color and depth
                                 Dispatcher.BeginInvoke(
                                     (Action)
                                     (() =>
@@ -1721,28 +1804,25 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
 
                                 // Flag that we have captured color
                                 this.colorCaptured = true;
+
                             }
-                            else if(this.tracking)
+                            else if (this.tracking)
                             {
                                 Dispatcher.BeginInvoke(
                                     (Action)
                                     (() =>
-                                        ReconstructStuff(sensor)
-                            ));
-
-
-
+                                        doDepthStuff(sensor)
+                                ));
                             }
                             else
                             {
+
                                 // Just integrate depth
                                 Dispatcher.BeginInvoke(
                                     (Action)
                                     (() =>
-                                     this.volume.IntegrateFrame(
-                                         sensor.DepthFloatFrame, this.integrationWeight, this.volume.GetCurrentWorldToCameraTransform())));
-
-
+                                        this.volume.IntegrateFrame(
+                                            sensor.DepthFloatFrame, this.integrationWeight, sensor.ReconCamera.WorldToCameraMatrix4)));
 
                             }
                         }
@@ -2081,67 +2161,62 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
         /// <param name="sender">Event sender.</param>
         /// <param name="e">Event arguments.</param>
         private void CreateMeshButtonClick(object sender, RoutedEventArgs e)
-      //  private void ReconstructFramesButtonClick(object sender, RoutedEventArgs e)
         {
             if (null == this.sensors)
             {
                 return;
             }
-            if (tracking)
+
+            this.tracking = !this.tracking;
+            // Reconstruct frames
+            bool[] successfulSaveSettings = this.Reconstruct();
+
+            if (null == successfulSaveSettings)
             {
-                tracking = false;
+                this.lastSensorSettingStatus = string.Empty;
             }
             else
             {
-                tracking = true;
-                // Reconstruct frames
-                bool[] successfulSaveSettings = this.Reconstruct();
+                StringBuilder successfulSaveCameras = new StringBuilder("Camera ");
+                StringBuilder failedSaveCameras = new StringBuilder("Camera ");
+                bool hasSuccessfulSavedCamera = false;
+                bool hasFailedSavedCamera = false;
 
-                if (null == successfulSaveSettings)
+                for (int i = 0; i < successfulSaveSettings.Length; i++)
                 {
-                    this.lastSensorSettingStatus = string.Empty;
-                }
-                else
-                {
-                    StringBuilder successfulSaveCameras = new StringBuilder("Camera ");
-                    StringBuilder failedSaveCameras = new StringBuilder("Camera ");
-                    bool hasSuccessfulSavedCamera = false;
-                    bool hasFailedSavedCamera = false;
-
-                    for (int i = 0; i < successfulSaveSettings.Length; i++)
+                    if (successfulSaveSettings[i])
                     {
-                        if (successfulSaveSettings[i])
-                        {
-                            successfulSaveCameras.AppendFormat("{0} ", i);
+                        successfulSaveCameras.AppendFormat("{0} ", i);
 
-                            hasSuccessfulSavedCamera = true;
-                        }
-                        else
-                        {
-                            failedSaveCameras.AppendFormat("{0} ", i);
-
-                            hasFailedSavedCamera = true;
-                        }
+                        hasSuccessfulSavedCamera = true;
                     }
-
-                    StringBuilder cameraSavingStatus = new StringBuilder(string.Empty);
-                    if (hasSuccessfulSavedCamera)
+                    else
                     {
-                        cameraSavingStatus.AppendFormat("{0}: {1}    ", successfulSaveCameras, Properties.Resources.SettingsSaved);
-                    }
+                        failedSaveCameras.AppendFormat("{0} ", i);
 
-                    if (hasFailedSavedCamera)
-                    {
-                        cameraSavingStatus.AppendFormat("{0}: {1}    ", failedSaveCameras, Properties.Resources.ErrorSaveSettings);
+                        hasFailedSavedCamera = true;
                     }
-
-                    this.lastSensorSettingStatus = cameraSavingStatus.ToString();
                 }
 
-                // Update manual reset information to status bar
-                this.ShowStatusMessage(Properties.Resources.Reconstructing);
+                StringBuilder cameraSavingStatus = new StringBuilder(string.Empty);
+                if (hasSuccessfulSavedCamera)
+                {
+                    cameraSavingStatus.AppendFormat("{0}: {1}    ", successfulSaveCameras, Properties.Resources.SettingsSaved);
+                }
+
+                if (hasFailedSavedCamera)
+                {
+                    cameraSavingStatus.AppendFormat("{0}: {1}    ", failedSaveCameras, Properties.Resources.ErrorSaveSettings);
+                }
+
+                this.lastSensorSettingStatus = cameraSavingStatus.ToString();
             }
+
+            // Update manual reset information to status bar
+            this.ShowStatusMessage(Properties.Resources.Reconstructing);
         }
+
+        //private void CreateMeshButtonClick(object sender, RoutedEventArgs e)
         //{
         //    if (null == this.volume)
         //    {
@@ -2251,7 +2326,7 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
             {
                 try
                 {
-                    sensor.Sensor.ForceInfraredEmitterOff = forceOff;
+ //                   sensor.Sensor.ForceInfraredEmitterOff = forceOff;
                 }
                 catch (InvalidOperationException)
                 {

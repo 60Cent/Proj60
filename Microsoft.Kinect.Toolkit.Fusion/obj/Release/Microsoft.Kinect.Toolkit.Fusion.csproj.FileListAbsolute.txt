@@ -1,0 +1,9 @@
+D:\Kinect\Microsoft.Kinect.Toolkit.Fusion\bin\Release\KinectFusion180_32.dll
+D:\Kinect\Microsoft.Kinect.Toolkit.Fusion\bin\Release\KinectFusion180_64.dll
+D:\Kinect\Microsoft.Kinect.Toolkit.Fusion\bin\Release\Microsoft.Kinect.Toolkit.Fusion.dll
+D:\Kinect\Microsoft.Kinect.Toolkit.Fusion\bin\Release\Microsoft.Kinect.Toolkit.Fusion.pdb
+D:\Kinect\Microsoft.Kinect.Toolkit.Fusion\obj\Release\Microsoft.Kinect.Toolkit.Fusion.csprojResolveAssemblyReference.cache
+D:\Kinect\Microsoft.Kinect.Toolkit.Fusion\obj\Release\Microsoft.Kinect.Toolkit.Fusion.Resources.resources
+D:\Kinect\Microsoft.Kinect.Toolkit.Fusion\obj\Release\Microsoft.Kinect.Toolkit.Fusion.csproj.GenerateResource.Cache
+D:\Kinect\Microsoft.Kinect.Toolkit.Fusion\obj\Release\Microsoft.Kinect.Toolkit.Fusion.dll
+D:\Kinect\Microsoft.Kinect.Toolkit.Fusion\obj\Release\Microsoft.Kinect.Toolkit.Fusion.pdb

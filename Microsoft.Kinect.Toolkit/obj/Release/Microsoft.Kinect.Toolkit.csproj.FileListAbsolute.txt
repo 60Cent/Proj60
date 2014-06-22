@@ -1,0 +1,12 @@
+D:\Kinect\Microsoft.Kinect.Toolkit\bin\Release\Microsoft.Kinect.Toolkit.dll
+D:\Kinect\Microsoft.Kinect.Toolkit\bin\Release\Microsoft.Kinect.Toolkit.pdb
+D:\Kinect\Microsoft.Kinect.Toolkit\bin\Release\Microsoft.Kinect.Toolkit.dll.CodeAnalysisLog.xml
+D:\Kinect\Microsoft.Kinect.Toolkit\bin\Release\Microsoft.Kinect.Toolkit.dll.lastcodeanalysissucceeded
+D:\Kinect\Microsoft.Kinect.Toolkit\obj\Release\KinectSensorChooserUI.baml
+D:\Kinect\Microsoft.Kinect.Toolkit\obj\Release\KinectSensorChooserUI.g.cs
+D:\Kinect\Microsoft.Kinect.Toolkit\obj\Release\Microsoft.Kinect.Toolkit_MarkupCompile.cache
+D:\Kinect\Microsoft.Kinect.Toolkit\obj\Release\Microsoft.Kinect.Toolkit.g.resources
+D:\Kinect\Microsoft.Kinect.Toolkit\obj\Release\Microsoft.Kinect.Toolkit.Properties.Resources.resources
+D:\Kinect\Microsoft.Kinect.Toolkit\obj\Release\Microsoft.Kinect.Toolkit.csproj.GenerateResource.Cache
+D:\Kinect\Microsoft.Kinect.Toolkit\obj\Release\Microsoft.Kinect.Toolkit.dll
+D:\Kinect\Microsoft.Kinect.Toolkit\obj\Release\Microsoft.Kinect.Toolkit.pdb

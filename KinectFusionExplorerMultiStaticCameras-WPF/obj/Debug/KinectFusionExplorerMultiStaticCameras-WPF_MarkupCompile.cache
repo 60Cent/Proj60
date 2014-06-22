@@ -4,16 +4,16 @@
 winexe
 C#
 .cs
-D:\Kinect\Proj60\KinectFusionExplorerMultiStaticCameras-WPF\obj\Debug\
+D:\Kinect\KinectFusionExplorerMultiStaticCameras-WPF\obj\Debug\
 Microsoft.Samples.Kinect.KinectFusionExplorer
 none
 false
 DEBUG;TRACE
-D:\Kinect\Proj60\KinectFusionExplorerMultiStaticCameras-WPF\App.xaml
+D:\Kinect\KinectFusionExplorerMultiStaticCameras-WPF\App.xaml
 2790123282
 
 12-2042447626
-15-699527927
+15-1131904096
 MainWindow.xaml;ReconstructionSensorControl.xaml;
 
 False

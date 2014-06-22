@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ReconstructionSensorSettings xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <UseSensor>true</UseSensor>
-  <NearMode>true</NearMode>
+  <NearMode>false</NearMode>
   <MirrorDepth>false</MirrorDepth>
   <CaptureColor>false</CaptureColor>
   <MinDepthClip>0.35</MinDepthClip>
   <MaxDepthClip>8</MaxDepthClip>
-  <AngleX>0</AngleX>
-  <AngleY>0</AngleY>
-  <AngleZ>0</AngleZ>
+  <AngleX>-2.3561945</AngleX>
+  <AngleY>-3.11666918E-06</AngleY>
+  <AngleZ>0.013707784</AngleZ>
   <AxisDistance>0.5</AxisDistance>
 </ReconstructionSensorSettings>

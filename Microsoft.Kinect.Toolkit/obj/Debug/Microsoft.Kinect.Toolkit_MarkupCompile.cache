@@ -4,11 +4,11 @@
 library
 C#
 .cs
-D:\Temp\kinect\60cent\Proj60\Microsoft.Kinect.Toolkit\obj\Debug\
+D:\Kinect\Microsoft.Kinect.Toolkit\obj\Debug\
 Microsoft.Kinect.Toolkit
 none
 false
-DEBUG;TRACE
+CODE_ANALYSIS;DEBUG;TRACE
 
 1-1341555513
 
