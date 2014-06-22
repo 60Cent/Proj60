@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ReconstructionSensorSettings xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <UseSensor>true</UseSensor>
+  <NearMode>true</NearMode>
+  <MirrorDepth>false</MirrorDepth>
+  <CaptureColor>false</CaptureColor>
+  <MinDepthClip>0.35</MinDepthClip>
+  <MaxDepthClip>8</MaxDepthClip>
+  <AngleX>0</AngleX>
+  <AngleY>0</AngleY>
+  <AngleZ>0</AngleZ>
+  <AxisDistance>0.5</AxisDistance>
+</ReconstructionSensorSettings>

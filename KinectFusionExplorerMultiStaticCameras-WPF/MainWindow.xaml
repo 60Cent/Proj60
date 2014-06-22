@@ -305,7 +305,7 @@
                         <Button Margin="10 5 10 5" Background="{StaticResource KinectPurpleBrush}" BorderBrush="White" BorderThickness="2" Content="Reconstruct Frames" Height="30" Click="ReconstructFramesButtonClick" Width="186" Foreground="White" Focusable="False"/>
                         <Button Style="{StaticResource ResetButton}" Content="Reset Reconstruction" Margin="10 5 10 5" Click="ResetReconstructionButtonClick" AutomationProperties.AutomationId="ResetReconstruction"/>
 
-                        <Button Style="{StaticResource MeshButton}" Content="Create Mesh" Margin="10 5 5 0" Click="CreateMeshButtonClick" AutomationProperties.AutomationId="CreateMesh"/>
+                        <Button Style="{StaticResource MeshButton}" Content="Track" Margin="10 5 5 0" Click="CreateMeshButtonClick" AutomationProperties.AutomationId="CreateMesh"/>
 
                         <StackPanel Orientation="Horizontal" Margin="0 -3 0 0">
                             <RadioButton Name="stlFormat" Style="{StaticResource KinectRadioButton}" Content="STL" Margin="30 5 0 0" IsChecked="True" AutomationProperties.AutomationId="STLFormat"/>

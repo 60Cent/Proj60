@@ -248,19 +248,19 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
         /// The reconstruction volume voxel resolution in the X axis
         /// At a setting of 256vpm the volume is 512 / 256 = 2m wide
         /// </summary>
-        private int voxelsX = 512;
+        private int voxelsX = 256;//512;
 
         /// <summary>
         /// The reconstruction volume voxel resolution in the Y axis
         /// At a setting of 256vpm the volume is 384 / 256 = 1.5m high
         /// </summary>
-        private int voxelsY = 384;
+        private int voxelsY = 256;//384;
 
         /// <summary>
         /// The reconstruction volume voxel resolution in the Z axis
         /// At a setting of 256vpm the volume is 512 / 256 = 2m deep
         /// </summary>
-        private int voxelsZ = 512;
+        private int voxelsZ = 256;//512;
 
         /// <summary>
         /// The reconstruction is integrating frames
@@ -1205,7 +1205,7 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
                 return true;
             }
 
-            bool isSupportNearMode = true;
+            bool isSupportNearMode = false;
             try
             {
                 // Enable depth stream, register event handler and start
@@ -1497,7 +1497,7 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
 
                         if (this.processedFrameLeadInCount > PerCameraReconstructionFrameLeadInCount)
                         {
-                            if (this.processedFrameCount >= this.perCameraReconstructionFrameCount)
+                            if (this.processedFrameCount >= this.perCameraReconstructionFrameCount && !tracking)
                             {
                                 if (this.GoToNextCameraIndex())
                                 {
@@ -1624,7 +1624,7 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
             }
 
             // Check near mode
-            //sensor.CheckNearMode();
+            sensor.CheckNearMode();
 
             // Convert depth frame to depth float frame
             this.volume.DepthToDepthFloatFrame(
@@ -1634,6 +1634,46 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
             Dispatcher.BeginInvoke((Action)(() => this.DepthFrameComplete(sensor)));
         }
 
+
+        private void ReconstructStuff(ReconstructionSensor sensor)
+        {
+            // Just integrate depth
+            float alignmentEnergy = 1;
+            bool tracked = false;
+            Matrix4 AlignmentMatrix = sensor.ReconCamera.WorldToCameraMatrix4;
+            if (this.currentWorldPCL == null)
+            {
+                this.currentWorldPCL = new FusionPointCloudImageFrame(sensor.DepthWidth, sensor.DepthHeight);
+                this.currentCameraPCL = new FusionPointCloudImageFrame(sensor.DepthWidth, sensor.DepthHeight);
+            }
+
+
+            tracked = this.volume.ProcessFrame(
+                sensor.DepthFloatFrame,
+                7,
+               this.integrationWeight,
+               sensor.ReconCamera.WorldToCameraMatrix4);
+            //this.volume.IntegrateFrame(
+            //    sensor.DepthFloatFrame,
+            //    this.integrationWeight,
+            //    sensor.ReconCamera.WorldToCameraMatrix4);
+            //this.volume.CalculatePointCloud(this.currentWorldPCL, this.volume.GetCurrentWorldToCameraTransform());
+
+            //tracked = this.volume.AlignPointClouds(
+            //    this.currentCameraPCL,
+            //    this.currentWorldPCL,
+            //    10,
+            //    sensor.deltaFromReferenceFrame,
+            //    out alignmentEnergy,
+            //    ref AlignmentMatrix);
+            //this.currentCameraPCL = this.currentWorldPCL;
+            
+
+            if (tracked)
+            {
+                sensor.ReconCamera.UpdateFrustumTransformMatrix4(this.volume.GetCurrentWorldToCameraTransform());
+            }
+        }
         /// <summary>
         /// Process the depth input
         /// </summary>
@@ -1684,26 +1724,12 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
                             }
                             else if(this.tracking)
                             {
-                                // Just integrate depth
-                                float alignmentEnergy;
-                                Matrix4 AlignmentMatrix = new Matrix4();
                                 Dispatcher.BeginInvoke(
                                     (Action)
                                     (() =>
-                                     this.volume.IntegrateFrame(
-                                         sensor.DepthFloatFrame, this.integrationWeight, this.volume.GetCurrentWorldToCameraTransform())));
+                                        ReconstructStuff(sensor)
+                            ));
 
-                                this.volume.CalculatePointCloud(this.currentWorldPCL, this.volume.GetCurrentWorldToCameraTransform());
-
-                                this.volume.AlignPointClouds(this.currentCameraPCL,
-                                    this.currentWorldPCL,
-                                    100,
-                                    null,
-                                    out alignmentEnergy,
-                                    ref AlignmentMatrix);
-
-                                this.currentCameraPCL = this.currentWorldPCL;
-                                sensor.ReconCamera.UpdateFrustumTransformMatrix4(AlignmentMatrix);
 
 
                             }
@@ -2055,88 +2081,149 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
         /// <param name="sender">Event sender.</param>
         /// <param name="e">Event arguments.</param>
         private void CreateMeshButtonClick(object sender, RoutedEventArgs e)
+      //  private void ReconstructFramesButtonClick(object sender, RoutedEventArgs e)
         {
-            if (null == this.volume)
+            if (null == this.sensors)
             {
-                this.ShowStatusMessage(Properties.Resources.MeshNullVolume);
                 return;
             }
-
-            this.savingMesh = true;
-
-            try
+            if (tracking)
             {
-                this.ShowStatusMessage(Properties.Resources.SavingMesh);
+                tracking = false;
+            }
+            else
+            {
+                tracking = true;
+                // Reconstruct frames
+                bool[] successfulSaveSettings = this.Reconstruct();
 
-                ColorMesh mesh = this.volume.CalculateMesh(1);
-
-                Win32.SaveFileDialog dialog = new Win32.SaveFileDialog();
-
-                if (true == this.stlFormat.IsChecked)
+                if (null == successfulSaveSettings)
                 {
-                    dialog.FileName = "MeshedReconstruction.stl";
-                    dialog.Filter = "STL Mesh Files|*.stl|All Files|*.*";
-                }
-                else if (true == this.objFormat.IsChecked)
-                {
-                    dialog.FileName = "MeshedReconstruction.obj";
-                    dialog.Filter = "OBJ Mesh Files|*.obj|All Files|*.*";
+                    this.lastSensorSettingStatus = string.Empty;
                 }
                 else
                 {
-                    dialog.FileName = "MeshedReconstruction.ply";
-                    dialog.Filter = "PLY Mesh Files|*.ply|All Files|*.*";
-                }
+                    StringBuilder successfulSaveCameras = new StringBuilder("Camera ");
+                    StringBuilder failedSaveCameras = new StringBuilder("Camera ");
+                    bool hasSuccessfulSavedCamera = false;
+                    bool hasFailedSavedCamera = false;
 
-                if (true == dialog.ShowDialog())
-                {
-                    if (true == this.stlFormat.IsChecked)
+                    for (int i = 0; i < successfulSaveSettings.Length; i++)
                     {
-                        using (BinaryWriter writer = new BinaryWriter(dialog.OpenFile()))
+                        if (successfulSaveSettings[i])
                         {
-                            // Default to flip Y,Z coordinates on save
-                            Helper.SaveBinaryStlMesh(mesh, writer, true);
+                            successfulSaveCameras.AppendFormat("{0} ", i);
+
+                            hasSuccessfulSavedCamera = true;
                         }
-                    }
-                    else if (true == this.objFormat.IsChecked)
-                    {
-                        using (StreamWriter writer = new StreamWriter(dialog.FileName))
+                        else
                         {
-                            // Default to flip Y,Z coordinates on save
-                            Helper.SaveAsciiObjMesh(mesh, writer, true);
-                        }
-                    }
-                    else
-                    {
-                        using (StreamWriter writer = new StreamWriter(dialog.FileName))
-                        {
-                            // Default to flip Y,Z coordinates on save
-                            Helper.SaveAsciiPlyMesh(mesh, writer, true, this.colorCaptured);
+                            failedSaveCameras.AppendFormat("{0} ", i);
+
+                            hasFailedSavedCamera = true;
                         }
                     }
 
-                    this.ShowStatusMessage(Properties.Resources.MeshSaved);
-                }
-                else
-                {
-                    this.ShowStatusMessage(Properties.Resources.MeshSaveCanceled);
-                }
-            }
-            catch (ArgumentException)
-            {
-                this.ShowStatusMessage(Properties.Resources.ErrorSaveMesh);
-            }
-            catch (InvalidOperationException)
-            {
-                this.ShowStatusMessage(Properties.Resources.ErrorSaveMesh);
-            }
-            catch (IOException)
-            {
-                this.ShowStatusMessage(Properties.Resources.ErrorSaveMesh);
-            }
+                    StringBuilder cameraSavingStatus = new StringBuilder(string.Empty);
+                    if (hasSuccessfulSavedCamera)
+                    {
+                        cameraSavingStatus.AppendFormat("{0}: {1}    ", successfulSaveCameras, Properties.Resources.SettingsSaved);
+                    }
 
-            this.savingMesh = false;
+                    if (hasFailedSavedCamera)
+                    {
+                        cameraSavingStatus.AppendFormat("{0}: {1}    ", failedSaveCameras, Properties.Resources.ErrorSaveSettings);
+                    }
+
+                    this.lastSensorSettingStatus = cameraSavingStatus.ToString();
+                }
+
+                // Update manual reset information to status bar
+                this.ShowStatusMessage(Properties.Resources.Reconstructing);
+            }
         }
+        //{
+        //    if (null == this.volume)
+        //    {
+        //        this.ShowStatusMessage(Properties.Resources.MeshNullVolume);
+        //        return;
+        //    }
+
+        //    this.savingMesh = true;
+
+        //    try
+        //    {
+        //        this.ShowStatusMessage(Properties.Resources.SavingMesh);
+
+        //        ColorMesh mesh = this.volume.CalculateMesh(1);
+
+        //        Win32.SaveFileDialog dialog = new Win32.SaveFileDialog();
+
+        //        if (true == this.stlFormat.IsChecked)
+        //        {
+        //            dialog.FileName = "MeshedReconstruction.stl";
+        //            dialog.Filter = "STL Mesh Files|*.stl|All Files|*.*";
+        //        }
+        //        else if (true == this.objFormat.IsChecked)
+        //        {
+        //            dialog.FileName = "MeshedReconstruction.obj";
+        //            dialog.Filter = "OBJ Mesh Files|*.obj|All Files|*.*";
+        //        }
+        //        else
+        //        {
+        //            dialog.FileName = "MeshedReconstruction.ply";
+        //            dialog.Filter = "PLY Mesh Files|*.ply|All Files|*.*";
+        //        }
+
+        //        if (true == dialog.ShowDialog())
+        //        {
+        //            if (true == this.stlFormat.IsChecked)
+        //            {
+        //                using (BinaryWriter writer = new BinaryWriter(dialog.OpenFile()))
+        //                {
+        //                    // Default to flip Y,Z coordinates on save
+        //                    Helper.SaveBinaryStlMesh(mesh, writer, true);
+        //                }
+        //            }
+        //            else if (true == this.objFormat.IsChecked)
+        //            {
+        //                using (StreamWriter writer = new StreamWriter(dialog.FileName))
+        //                {
+        //                    // Default to flip Y,Z coordinates on save
+        //                    Helper.SaveAsciiObjMesh(mesh, writer, true);
+        //                }
+        //            }
+        //            else
+        //            {
+        //                using (StreamWriter writer = new StreamWriter(dialog.FileName))
+        //                {
+        //                    // Default to flip Y,Z coordinates on save
+        //                    Helper.SaveAsciiPlyMesh(mesh, writer, true, this.colorCaptured);
+        //                }
+        //            }
+
+        //            this.ShowStatusMessage(Properties.Resources.MeshSaved);
+        //        }
+        //        else
+        //        {
+        //            this.ShowStatusMessage(Properties.Resources.MeshSaveCanceled);
+        //        }
+        //    }
+        //    catch (ArgumentException)
+        //    {
+        //        this.ShowStatusMessage(Properties.Resources.ErrorSaveMesh);
+        //    }
+        //    catch (InvalidOperationException)
+        //    {
+        //        this.ShowStatusMessage(Properties.Resources.ErrorSaveMesh);
+        //    }
+        //    catch (IOException)
+        //    {
+        //        this.ShowStatusMessage(Properties.Resources.ErrorSaveMesh);
+        //    }
+
+        //    this.savingMesh = false;
+        //}
 
         /// <summary>
         /// Handler for volume setting changing event

@@ -26,7 +26,7 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
         /// started is set true when the camera is running
         /// </summary>
         private bool started = false;
-
+        public FusionColorImageFrame deltaFromReferenceFrame;
         /// <summary>
         /// Track whether Dispose has been called
         /// </summary>
@@ -554,7 +554,7 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
                 Size imageSize = Helper.GetImageSize(this.DepthFormat);
                 this.depthWidth = (int)imageSize.Width;
                 this.depthHeight = (int)imageSize.Height;
-
+                this.deltaFromReferenceFrame = new FusionColorImageFrame(this.depthWidth, this.depthHeight);
                 // Create the graphics camera and set at origin initially - we will override by setting the transform explicitly below
                 this.reconstructionSensorCamera = new GraphicsCamera(new Point3D(0, 0, 0), Quaternion.Identity, (float)this.depthWidth / (float)this.depthHeight);
 
