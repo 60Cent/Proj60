@@ -561,7 +561,7 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
                 this.reconstructionSensorCamera = new GraphicsCamera(new Point3D(0, 0, 0), Quaternion.Identity, (float)this.depthWidth / (float)this.depthHeight);
 
                 // Update view transform now, from ReconstructionSensorControl
-                this.SetCameraTransformation((float)this.reconstructionSensorControl.AngleX, (float)this.reconstructionSensorControl.AngleY, (float)this.reconstructionSensorControl.AngleZ, (float)this.reconstructionSensorControl.AxisDistance);
+                this.SetCameraTransformation((float)this.reconstructionSensorControl.AngleX, (float)this.reconstructionSensorControl.AngleY, (float)this.reconstructionSensorControl.AngleZ, (float)this.reconstructionSensorControl.AxisDistance,this.reconstructionSensorCamera.WorldToCameraMatrix4);
             }
             catch (IOException ex)
             {
@@ -735,7 +735,8 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
                             reconSensorSettings.AngleX,
                             reconSensorSettings.AngleY,
                             reconSensorSettings.AngleZ,
-                            reconSensorSettings.AxisDistance);
+                            reconSensorSettings.AxisDistance,
+                            reconSensorSettings.CameraTransformMatrix);
 
                         successfulLoad = true;
                     }
@@ -797,7 +798,7 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
                     myWriter = new StreamWriter(sensorName + ".xml");
 
                     mySerializer.Serialize(myWriter, this.reconstructionSensorControl.SensorSettings);
-
+                    myWriter.Flush();
                     successfulSave = true;
                 }
             }
@@ -1146,7 +1147,7 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
         /// <param name="e">Event parameter</param>
         private void OnSetCameraTransformation(object sender, TransformEventArgs e)
         {
-            this.SetCameraTransformation(e.AngleX, e.AngleY, e.AngleZ, e.AxisDistance);
+            this.SetCameraTransformation(e.AngleX, e.AngleY, e.AngleZ, e.AxisDistance, e.CameraTransformMatrix);
         }
 
         /// <summary>
@@ -1162,6 +1163,56 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
             }
         }
 
+        public static void CreateFromMatrix(ref Matrix4 m, ref Quaternion q)
+        {
+            float trace = 1 + m.M11 + m.M22 + m.M33;
+			float S = 0;
+			float X = 0;
+			float Y = 0;
+			float Z = 0;
+			float W = 0;
+			
+			if (trace > 0.0000001) 
+			{
+				S = (float)Math.Sqrt(trace) * 2;
+				X = (m.M23 - m.M32) / S;
+				Y = (m.M31 - m.M13) / S;
+				Z = (m.M12 - m.M21) / S;
+				W = 0.25f * S;
+			} 
+			else 
+			{
+				if (m.M11 > m.M22 && m.M11 > m.M33) 
+				{
+					// Column 0: 
+					S = (float)Math.Sqrt(1.0 + m.M11 - m.M22 - m.M33) * 2;
+					X = 0.25f * S;
+					Y = (m.M12 + m.M21) / S;
+					Z = (m.M31 + m.M13) / S;
+					W = (m.M23 - m.M32) / S;
+				} 
+				else if (m.M22 > m.M33) 
+				{
+					// Column 1: 
+					S = (float)Math.Sqrt(1.0 + m.M22 - m.M11 - m.M33) * 2;
+					X = (m.M12 + m.M21) / S;
+					Y = 0.25f * S;
+					Z = (m.M23 + m.M32) / S;
+					W = (m.M31 - m.M13) / S;
+				} 
+				else 
+				{
+					// Column 2:
+					S = (float)Math.Sqrt(1.0 + m.M33 - m.M11 - m.M22) * 2;
+					X = (m.M31 + m.M13) / S;
+					Y = (m.M23 + m.M32) / S;
+					Z = 0.25f * S;
+					W = (m.M12 - m.M21) / S;
+				}
+			}
+			q = new Quaternion(X, Y, Z, W);
+       }
+
         /// <summary>
         /// Set a Camera Transformation
         /// Note: In WPF, the standard Right Hand coordinate system has the +X axis to the right, +Y axis up, and +Z axis out of the screen towards the viewer
@@ -1175,29 +1226,38 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
         /// <param name="angleY">The rotation around the Y axis.</param>
         /// <param name="angleZ">The rotation around the Z axis.</param>
         /// <param name="axisDistance">The distance from the origin.</param>
-        private void SetCameraTransformation(float angleX, float angleY, float angleZ, float axisDistance)
+        private void SetCameraTransformation(float angleX, float angleY, float angleZ, float axisDistance, Matrix4 cameraTransformMatrix)
         {
             Vector3D t = new Vector3D();
             t.Z = axisDistance; // along Z (which is correct if camera is situated along +Z, looking along Z towards origin
 
-            // Axis-Aligned
-            if (angleX == 0 && angleY == 0 && angleZ == 0)
+            if(cameraTransformMatrix == Matrix4.Identity)
             {
-                Quaternion q = Quaternion.Identity;
+                // Axis-Aligned
+                if (angleX == 0 && angleY == 0 && angleZ == 0)
+                {
+                    Quaternion q = Quaternion.Identity;
 
-                // Set identity pose with axis distance
-                this.reconstructionSensorCamera.UpdateTransform(q, t);
+                    // Set identity pose with axis distance
+                    this.reconstructionSensorCamera.UpdateTransform(q, t);
+                }
+                else
+                {
+                    Quaternion qx = new Quaternion(new Vector3D(1, 0, 0), angleX);
+                    Quaternion qy = new Quaternion(new Vector3D(0, 1, 0), angleY);
+                    Quaternion qz = new Quaternion(new Vector3D(0, 0, 1), angleZ);
+
+                    Quaternion q = qx * qy * qz;
+                    this.reconstructionSensorCamera.UpdateTransform(q, t);
+                }
             }
             else
             {
-                Quaternion qx = new Quaternion(new Vector3D(1, 0, 0), angleX);
-                Quaternion qy = new Quaternion(new Vector3D(0, 1, 0), angleY);
-                Quaternion qz = new Quaternion(new Vector3D(0, 0, 1), angleZ);
-
-                Quaternion q = qx * qy * qz;
+                //this.reconstructionSensorCamera.UpdateFrustumTransformMatrix4(cameraTransformMatrix);
+                Quaternion q = new Quaternion();
+                CreateFromMatrix(ref cameraTransformMatrix, ref q);
                 this.reconstructionSensorCamera.UpdateTransform(q, t);
             }
-
             // Raise a camera transform changed event
             if (null != this.SensorTransformationChanged)
             {

@@ -24,7 +24,6 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
     using Microsoft.Kinect.Toolkit;
     using Microsoft.Kinect.Toolkit.Fusion;
     using Wpf3DTools;
-
     /// <summary>
     /// Interaction logic for the <see cref="MainWindow"/> class
     /// </summary>
@@ -1482,7 +1481,7 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
                             if (this.GoToNextCameraIndex())
                             {
                                 // out of cameras 
-                                this.ShowStatusMessage(this.lastSensorSettingStatus + Properties.Resources.DoneReconstructing); 
+                                this.ShowStatusMessage(this.lastSensorSettingStatus + Properties.Resources.DoneReconstructing);
                                 return;
                             }
                             else
@@ -1640,7 +1639,7 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
         {
             tracked = this.volume.ProcessFrame(
                 sensor.DepthFloatFrame,
-                70,
+                7,
                 this.integrationWeight,
                 sensor.ReconCamera.WorldToCameraMatrix4);
             
@@ -1655,6 +1654,33 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
                 if (Math.Abs(accuracyOfTrack) < 0.1)
                 {
                     sensor.ReconCamera.UpdateFrustumTransformMatrix4(CameraChangeMatrix4);
+                    short[] volumeBlock = new short[2097152];
+                    
+                    
+                    this.volume.ExportVolumeBlock(0, 0, 0, 128, 128, 128, 1, volumeBlock);
+                    int calcVolume = 0;
+                    //for (int i = 0; i < 2097152; i++)
+                    //{
+                    //    if (volumeBlock[i] != 0x0000)
+                    //    {
+                    //        calcVolume++;
+                    //    }
+
+                    //}
+
+                    this.VolumeLabel.Text = calcVolume.ToString();
+                    //sensor.ReconSensorControl.AngleX = 180/Math.PI*Math.Atan2(CameraChangeMatrix4.M21, CameraChangeMatrix4.M21);
+
+                    //sensor.ReconSensorControl.AngleY = 180 / Math.PI * Math.Atan2(CameraChangeMatrix4.M31,
+                    //Math.Sqrt(
+                    //(
+                    //(CameraChangeMatrix4.M32) * (CameraChangeMatrix4.M32)
+                    //) + (
+                    //(CameraChangeMatrix4.M33) * (CameraChangeMatrix4.M33)
+                    //)
+                    //));
+
+                    //sensor.ReconSensorControl.AngleZ = 180 / Math.PI * Math.Atan2(sensor.ReconCamera.WorldToCameraMatrix4.M32, CameraChangeMatrix4.M33);
                 }
 
                 tracked = false;
@@ -1669,9 +1695,11 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
                     this.integrationWeight = 1;
                 }
                 sensor.ReconCamera.WorldToCameraMatrix4 = this.volume.GetCurrentWorldToCameraTransform();
+                sensor.ReconSensorControl.CameraTransformMatrix = this.volume.GetCurrentWorldToCameraTransform();
             }
         }
 
+        private bool first = true;
         private void ReconstructDepthData(ReconstructionSensor sensor)
         {
             try
@@ -1719,6 +1747,19 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
                             }
                             else if (this.tracking)
                             {
+                                if (first)
+                                {
+                                    float centreDepth = this.depthFloatFrameDepthPixels[this.depthHeight * this.depthWidth / 2];
+                                    if (centreDepth > 0.0)
+                                    {
+                                    //    Dispatcher.BeginInvoke(
+                                    //(Action)
+                                    //(() =>
+                                    //    sensor.ReconSensorControl.AxisDistance = centreDepth
+                                    //    ));
+                                    }
+                                    first = false;
+                                }
                                 Dispatcher.BeginInvoke(
                                     (Action)
                                     (() =>
@@ -1727,7 +1768,7 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
                             }
                             else
                             {
-
+                                first = true;
                                 // Just integrate depth
                                 Dispatcher.BeginInvoke(
                                     (Action)
@@ -1738,8 +1779,10 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
                             }
                         }
                     }
-
-                    Dispatcher.BeginInvoke((Action)(() => this.RenderReconstruction(this.useCameraViewInReconstruction ? sensor : null)));
+                    if (this.processedFrameCount % 2 == 0)
+                    {
+                        Dispatcher.BeginInvoke((Action)(() => this.RenderReconstruction(this.useCameraViewInReconstruction ? sensor : null)));
+                    }
                 }
             }
             catch (InvalidOperationException ex)
@@ -2082,6 +2125,16 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
             {
 
                 this.tracking = false;
+                bool[] successfulSave = null;
+                if (this.loadSavePerKinectSettings && this.sensors.Count > 0)
+                {
+                    successfulSave = new bool[this.sensors.Count];
+
+                    for (int i = 0; i < this.sensors.Count; i++)
+                    {
+                        successfulSave[i] = this.sensors[i].SaveSettings();
+                    }
+                }
             }
             else
             {

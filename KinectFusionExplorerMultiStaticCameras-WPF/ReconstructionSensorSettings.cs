@@ -7,6 +7,8 @@
 namespace Microsoft.Samples.Kinect.KinectFusionExplorer
 {
     using System;
+    using Microsoft.Kinect;
+    using Microsoft.Kinect.Toolkit;
     using Microsoft.Kinect.Toolkit.Fusion;
 
     /// <summary>
@@ -30,6 +32,7 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
             this.AngleY = 0;
             this.AngleZ = 0;
             this.AxisDistance = 0.50f;
+            this.CameraTransformMatrix = new Matrix4();
         }
 
         /// <summary>
@@ -67,6 +70,7 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
             this.AngleY = angleY;
             this.AngleZ = angleZ;
             this.AxisDistance = axisDistance;
+            this.CameraTransformMatrix = new Matrix4();
         }
 
         #region Properties
@@ -122,6 +126,8 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
         /// Gets or sets the Kinect sensor distance relative to world origin
         /// </summary>
         public float AxisDistance { get; set; }
+
+        public Matrix4 CameraTransformMatrix { get; set; }
 
         #endregion
     }

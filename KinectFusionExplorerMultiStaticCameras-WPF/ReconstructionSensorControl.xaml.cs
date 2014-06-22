@@ -12,6 +12,8 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Data;
+    using Microsoft.Kinect;
+    using Microsoft.Kinect.Toolkit;
 
     /// <summary>
     /// Interaction logic for the <see cref="ReconstructionSensorControl"/> class
@@ -298,6 +300,18 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
             }
         }
 
+        public Matrix4 CameraTransformMatrix
+        {
+            get
+            {
+                return this.reconSensorSettings.CameraTransformMatrix;
+            }
+
+            set
+            {
+                this.reconSensorSettings.CameraTransformMatrix = value;
+            }
+        }
         /// <summary>
         /// Gets the sensor settings
         /// </summary>
@@ -334,7 +348,8 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
             float angleX,
             float angleY,
             float angleZ,
-            float axisDistance)
+            float axisDistance,
+            Matrix4 cameraTransformMatrix)
         {
             this.UseSensor = useSensor;
             this.NearMode = nearMode;
@@ -346,6 +361,7 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
             this.AngleY = angleY;
             this.AngleZ = angleZ;
             this.AxisDistance = axisDistance;
+            this.CameraTransformMatrix = cameraTransformMatrix;
 
             this.SetCameraTransformation();
         }
@@ -363,7 +379,8 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
                      (float)this.reconSensorSettings.AngleX, 
                      (float)this.reconSensorSettings.AngleY,
                      (float)this.reconSensorSettings.AngleZ,
-                     (float)this.reconSensorSettings.AxisDistance));
+                     (float)this.reconSensorSettings.AxisDistance,
+                     (Matrix4)this.reconSensorSettings.CameraTransformMatrix));
              }
          }
 
@@ -435,7 +452,8 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
                  this.reconSensorSettings.AngleX,
                  this.reconSensorSettings.AngleY,
                  this.reconSensorSettings.AngleZ,
-                 this.reconSensorSettings.AxisDistance);
+                 this.reconSensorSettings.AxisDistance,
+                 this.reconSensorSettings.CameraTransformMatrix);
          }
     }
     
@@ -451,12 +469,13 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
         /// <param name="angleY">Rotation angle around Y axis.</param>
         /// <param name="angleZ">Rotation angle around Z axis.</param>
         /// <param name="axisDistance">Distance from world origin.</param>
-        public TransformEventArgs(float angleX, float angleY, float angleZ, float axisDistance)
+        public TransformEventArgs(float angleX, float angleY, float angleZ, float axisDistance,Matrix4 cameraTransformMatrix)
         {
             this.AngleX = angleX;
             this.AngleY = angleY;
             this.AngleZ = angleZ;
             this.AxisDistance = axisDistance;
+            this.CameraTransformMatrix = cameraTransformMatrix;
         }
 
         /// <summary>
@@ -478,6 +497,8 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
         /// Gets the distance of the camera from the origin
         /// </summary>
         public float AxisDistance { get; private set; }
+
+        public Matrix4 CameraTransformMatrix { get; set; }
     }
 
     /// <summary>

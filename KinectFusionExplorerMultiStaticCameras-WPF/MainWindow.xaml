@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:l="clr-namespace:Microsoft.Samples.Kinect.KinectFusionExplorer"
         xmlns:tk="clr-namespace:Microsoft.Kinect.Toolkit;assembly=Microsoft.Kinect.Toolkit"
-        Title="Kinect Fusion Explorer Multi-Static Cameras" Width="1090" Height="900" Loaded="WindowLoaded" Closing="WindowClosing" DataContext="{Binding RelativeSource={RelativeSource Self}}">
+        Title="Kinect Fusion Explorer Multi-Static Cameras" Width="1197.463" Height="900" Loaded="WindowLoaded" Closing="WindowClosing" DataContext="{Binding RelativeSource={RelativeSource Self}}">
 
     <Window.Resources>
         <SolidColorBrush x:Key="MediumGreyBrush" Color="#ff6e6e6e"/>
@@ -267,6 +267,7 @@
                     <Image Name="colorImage"/>
                 </Viewbox>
             </Grid>
+            <TextBox Name ="VolumeLabel" HorizontalAlignment="Left" Height="23" Margin="0,23,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="113"/>
         </Grid>
         
         <Grid Grid.Row="2" Height="245" VerticalAlignment="Top">
