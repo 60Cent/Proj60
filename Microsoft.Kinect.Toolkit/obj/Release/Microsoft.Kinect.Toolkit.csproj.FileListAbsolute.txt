@@ -10,3 +10,15 @@ D:\Kinect\Microsoft.Kinect.Toolkit\obj\Release\Microsoft.Kinect.Toolkit.Properti
 D:\Kinect\Microsoft.Kinect.Toolkit\obj\Release\Microsoft.Kinect.Toolkit.csproj.GenerateResource.Cache
 D:\Kinect\Microsoft.Kinect.Toolkit\obj\Release\Microsoft.Kinect.Toolkit.dll
 D:\Kinect\Microsoft.Kinect.Toolkit\obj\Release\Microsoft.Kinect.Toolkit.pdb
+C:\Kinect\Proj60\Proj60\Microsoft.Kinect.Toolkit\bin\Release\Microsoft.Kinect.Toolkit.dll
+C:\Kinect\Proj60\Proj60\Microsoft.Kinect.Toolkit\bin\Release\Microsoft.Kinect.Toolkit.pdb
+C:\Kinect\Proj60\Proj60\Microsoft.Kinect.Toolkit\bin\Release\Microsoft.Kinect.Toolkit.dll.CodeAnalysisLog.xml
+C:\Kinect\Proj60\Proj60\Microsoft.Kinect.Toolkit\bin\Release\Microsoft.Kinect.Toolkit.dll.lastcodeanalysissucceeded
+C:\Kinect\Proj60\Proj60\Microsoft.Kinect.Toolkit\obj\Release\KinectSensorChooserUI.baml
+C:\Kinect\Proj60\Proj60\Microsoft.Kinect.Toolkit\obj\Release\KinectSensorChooserUI.g.cs
+C:\Kinect\Proj60\Proj60\Microsoft.Kinect.Toolkit\obj\Release\Microsoft.Kinect.Toolkit_MarkupCompile.cache
+C:\Kinect\Proj60\Proj60\Microsoft.Kinect.Toolkit\obj\Release\Microsoft.Kinect.Toolkit.g.resources
+C:\Kinect\Proj60\Proj60\Microsoft.Kinect.Toolkit\obj\Release\Microsoft.Kinect.Toolkit.Properties.Resources.resources
+C:\Kinect\Proj60\Proj60\Microsoft.Kinect.Toolkit\obj\Release\Microsoft.Kinect.Toolkit.csproj.GenerateResource.Cache
+C:\Kinect\Proj60\Proj60\Microsoft.Kinect.Toolkit\obj\Release\Microsoft.Kinect.Toolkit.dll
+C:\Kinect\Proj60\Proj60\Microsoft.Kinect.Toolkit\obj\Release\Microsoft.Kinect.Toolkit.pdb

@@ -1,0 +1,17 @@
+﻿Build started 23/06/2014 3:47:59 PM.
+     1>Project "C:\Kinect\Proj60\Proj60\KinectFusionExplorerMultiStaticCameras-WPF\AMP_HelperFunctions\AMP_HelperFunctions.vcxproj" on node 2 (Build target(s)).
+     1>Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"..\..\Debug\AMP_HelperFunctions.dll" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"..\..\Debug\AMP_HelperFunctions.pdb" /SUBSYSTEM:WINDOWS /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"..\..\Debug\AMP_HelperFunctions.lib" /MACHINE:X86 /DLL Debug\AMP_HelperFunctions.obj
+         Debug\dllmain.obj
+         Debug\stdafx.obj
+            Creating library ..\..\Debug\AMP_HelperFunctions.lib and object ..\..\Debug\AMP_HelperFunctions.exp
+     1>AMP_HelperFunctions.obj : error LNK2019: unresolved external symbol __CrtDbgReportW referenced in function "public: bool __thiscall Concurrency::task_completion_event<unsigned char>::_Cancel<class std::shared_ptr<struct Concurrency::details::_ExceptionHolder> >(class std::shared_ptr<struct Concurrency::details::_ExceptionHolder>,void *)const " (??$_Cancel@V?$shared_ptr@U_ExceptionHolder@details@Concurrency@@@std@@@?$task_completion_event@E@Concurrency@@QBE_NV?$shared_ptr@U_ExceptionHolder@details@Concurrency@@@std@@PAX@Z)
+     1>libcpmtd.lib(stdthrow.obj) : error LNK2001: unresolved external symbol __CrtDbgReportW
+     1>libcpmtd.lib(mutex.obj) : error LNK2001: unresolved external symbol __CrtDbgReportW
+     1>libcpmtd.lib(future.obj) : error LNK2001: unresolved external symbol __CrtDbgReportW
+     1>..\..\Debug\AMP_HelperFunctions.dll : fatal error LNK1120: 1 unresolved externals
+     1>Done Building Project "C:\Kinect\Proj60\Proj60\KinectFusionExplorerMultiStaticCameras-WPF\AMP_HelperFunctions\AMP_HelperFunctions.vcxproj" (Build target(s)) -- FAILED.
+
+Build FAILED.
+
+Time Elapsed 00:00:01.53

@@ -20,6 +20,7 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
     using System.Windows.Media.Imaging;
     using System.Windows.Media.Media3D;
     using System.Windows.Threading;
+    using System.Runtime.InteropServices;
     using Microsoft.Kinect;
     using Microsoft.Kinect.Toolkit;
     using Microsoft.Kinect.Toolkit.Fusion;
@@ -599,6 +600,16 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
         private FusionColorImageFrame ShadedSurfaceNormalsFrame { get; set; }
 
         #endregion
+
+        /// <summary>
+        /// Function defined in HelloWorldLib.dll to square an array using C++ AMP
+        /// </summary>
+        [DllImport("AMP_HelperFunctions", CallingConvention = CallingConvention.StdCall)]
+        extern unsafe static void square_array(float* array, int length);
+        [DllImport("AMP_HelperFunctions", CallingConvention = CallingConvention.StdCall)]
+        extern unsafe static void findAllocatedUnits(int* array, int length, int* outArray, int outLength);
+        [DllImport("AMP_HelperFunctions", CallingConvention = CallingConvention.StdCall)]
+        extern unsafe static void reduction_sum_gpu_kernel(int* array, int length, int* result);
 
         /// <summary>
         /// Dispose resources
@@ -1655,18 +1666,27 @@ namespace Microsoft.Samples.Kinect.KinectFusionExplorer
                 {
                     sensor.ReconCamera.UpdateFrustumTransformMatrix4(CameraChangeMatrix4);
                     short[] volumeBlock = new short[2097152];
+                    int[] colourVolumeBlock = new int[2097152];
                     
                     
-                    this.volume.ExportVolumeBlock(0, 0, 0, 128, 128, 128, 1, volumeBlock);
-                    int calcVolume = 0;
-                    //for (int i = 0; i < 2097152; i++)
-                    //{
-                    //    if (volumeBlock[i] != 0x0000)
-                    //    {
-                    //        calcVolume++;
-                    //    }
+                    this.volume.ExportVolumeBlock(0, 0, 0, 128, 128, 128, 1, volumeBlock, colourVolumeBlock);
 
-                    //}
+                    int calcVolume = 0;
+                    short[] allocatedVoxel = new short[2097152];
+                    int[] allocatedColourVoxel = new int[2097152];
+                    unsafe
+                    {
+                        fixed (int* volumeBlockPtr = &colourVolumeBlock[0])
+                        {
+                            fixed (int* allocatedVoxelPtr = &allocatedColourVoxel[0])
+                            {
+                                findAllocatedUnits(volumeBlockPtr, volumeBlock.Length, allocatedVoxelPtr, allocatedVoxel.Length);
+                                reduction_sum_gpu_kernel(allocatedVoxelPtr, allocatedVoxel.Length, &calcVolume);
+                            }
+                        }
+
+                    }
+                    
 
                     this.VolumeLabel.Text = calcVolume.ToString();
                     //sensor.ReconSensorControl.AngleX = 180/Math.PI*Math.Atan2(CameraChangeMatrix4.M21, CameraChangeMatrix4.M21);

@@ -7,3 +7,12 @@ D:\Kinect\Microsoft.Kinect.Toolkit.Fusion\obj\Debug\Microsoft.Kinect.Toolkit.Fus
 D:\Kinect\Microsoft.Kinect.Toolkit.Fusion\obj\Debug\Microsoft.Kinect.Toolkit.Fusion.csproj.GenerateResource.Cache
 D:\Kinect\Microsoft.Kinect.Toolkit.Fusion\obj\Debug\Microsoft.Kinect.Toolkit.Fusion.dll
 D:\Kinect\Microsoft.Kinect.Toolkit.Fusion\obj\Debug\Microsoft.Kinect.Toolkit.Fusion.pdb
+C:\Kinect\Proj60\Proj60\Microsoft.Kinect.Toolkit.Fusion\bin\Debug\KinectFusion180_32.dll
+C:\Kinect\Proj60\Proj60\Microsoft.Kinect.Toolkit.Fusion\bin\Debug\KinectFusion180_64.dll
+C:\Kinect\Proj60\Proj60\Microsoft.Kinect.Toolkit.Fusion\bin\Debug\Microsoft.Kinect.Toolkit.Fusion.dll
+C:\Kinect\Proj60\Proj60\Microsoft.Kinect.Toolkit.Fusion\bin\Debug\Microsoft.Kinect.Toolkit.Fusion.pdb
+C:\Kinect\Proj60\Proj60\Microsoft.Kinect.Toolkit.Fusion\obj\Debug\Microsoft.Kinect.Toolkit.Fusion.csprojResolveAssemblyReference.cache
+C:\Kinect\Proj60\Proj60\Microsoft.Kinect.Toolkit.Fusion\obj\Debug\Microsoft.Kinect.Toolkit.Fusion.Resources.resources
+C:\Kinect\Proj60\Proj60\Microsoft.Kinect.Toolkit.Fusion\obj\Debug\Microsoft.Kinect.Toolkit.Fusion.csproj.GenerateResource.Cache
+C:\Kinect\Proj60\Proj60\Microsoft.Kinect.Toolkit.Fusion\obj\Debug\Microsoft.Kinect.Toolkit.Fusion.dll
+C:\Kinect\Proj60\Proj60\Microsoft.Kinect.Toolkit.Fusion\obj\Debug\Microsoft.Kinect.Toolkit.Fusion.pdb
